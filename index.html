@@ -3,23 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Azure Storage Blob View</title>
+    <title>Azure Storage Web Client</title>
 
+    <!-- CDN stylesheets -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-    <!--<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.1.2/darkly/bootstrap.min.css" integrity="sha384-RfekGV6fZXMN1XYz5oPc4N/0IDvTM1Nt6Xciam6v0Al+glvRJ2mhnsr2S6tH/qM8" crossorigin="anonymous">-->
-
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.1.2/yeti/bootstrap.min.css" integrity="sha384-y+fLJ0LEudr90hGVs3z3qJscIwBcKSNqDD1DU3CbG6LeKR5pFk7023EUU2cSRsOa" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
+
+    <!-- CDN scripts -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
+
+    <!-- Local scripts -->
+    <script src="./js/azure-storage.blob.min.js"></script>
+    <script src="./js/config.js"></script>
+    <script src="./js/main.js"></script>
 </head>
 <body>
     <div class="container">
-        <h1 id="header"></h1>
+        <h1 class="my-2">
+            <script>document.title = heading; document.write(heading);</script>
+        </h1>
 
         <div class="row my-2">
             <div class="col-sm" id="path"></div>
             <div class="col-sm text-right" id="controls"></div>
         </div>
 
-        <table class="table table-hover" id="result-table">
+        <table class="table table-hover" id="data-table">
             <thead class="thead-light">
                 <tr>
                     <th style="width: 60%">Name</th>
@@ -27,211 +39,8 @@
                     <th style="width: 25%">Last Modified</th>
                 </tr>
             </thead>
-            <tbody id="result"></tbody>
+            <tbody></tbody>
         </table>
     </div>
-
-    <script src="./azure-storage.blob.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
-    <script
-            src="https://code.jquery.com/jquery-3.3.1.min.js"
-            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-            crossorigin="anonymous"></script>
-    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
-    <script>
-        ///*
-        let accountName = '';
-        let containers = [ '' ];
-        //*/
-
-        let blobUri = 'https://' + accountName + '.blob.core.windows.net';
-        let service = AzureStorage.Blob.createBlobServiceAnonymous(blobUri);
-        //let service = AzureStorage.Blob.createBlobService(accountName, 'key');
-
-        let container = '';
-        let prefix = '';
-        let fileList = [];
-        let dataTable = null;
-
-        document.getElementById('header').innerHTML = location.host;
-
-        window.onpopstate = function(event) {
-            getList(window.location.hash.replace('#/', ''), false);
-        };
-
-        $(document).ready(function () {
-            dataTable = $('#result-table').DataTable({
-                "ordering": true,
-                "paging":   false,
-                "info":     false,
-                "columns": [
-                    { "data": "name", type: "directory-file" },
-                    { "data": "size", type: "file-size" },
-                    { "data": "lastModified", type: "date" }
-                ],
-                "language": {
-                    "emptyTable": "Empty Folder",
-                }
-            });
-
-            getList(window.location.hash.replace('#/', ''), false);
-        });
-
-        function getList(path, addHistory) {
-            if (path === undefined) path = '';
-            if (addHistory === undefined) addHistory = true;
-
-            if (path === '/') path = '';
-            container = path.split('/')[0];
-            prefix = path.split('/').slice(1, -1).join('/') + '/';
-            if (prefix === '/') prefix = '';
-
-            if (addHistory)
-                history.pushState(path, document.title, "#/" + path);
-
-            // Create path links
-            let pathLink = '<a href="javascript:void(0)" onclick="getList()">home/</a>';
-            let pathParts = path.split('/').slice(0,-1);
-            for (let i = 0; i < pathParts.length; i++) {
-                let pathPrefix = pathParts.slice(0, i + 1).join('/') + '/';
-                pathLink += '<a href="javascript:void(0)" onclick="getList(\'' + pathPrefix + '\')">' + pathParts[i] + '/</a>';
-            }
-            document.getElementById('path').innerHTML = pathLink;
-
-            // Create back link
-            let backPath = path.split('/').slice(0,-2).join('/') + '/';
-            document.getElementById('controls').innerHTML =
-                '<a href="javascript:void(0)" onclick="getList(\'' + backPath + '\')">Back</a> - ' +
-                '<a href="javascript:void(0)" onclick="getList(\'' + path + '\')">Refresh</a> ';
-
-            fileList = [];
-            dataTable.clear();
-
-            // Show list of containers
-            if (container.length === 0) {
-                for (let i = 0; i < containers.length; i++) {
-                    dataTable.row.add({
-                        name: '<a href="javascript:void(0)" onclick="getList(\'' + containers[i] + '/\')">' + containers[i].replace(prefix, '') + '/</a>',
-                        size: '',
-                        lastModified: ''
-                    });
-                }
-                dataTable.draw();
-
-                return;
-            }
-
-            // So container contents
-            service.listBlobDirectoriesSegmentedWithPrefix(container, prefix, null, {delimiter: '/'}, function (error, results) {
-                if (error) {
-                    alert('List blob error, please open browser console to view detailed error');
-                    console.log(error);
-                } else {
-                    let output = [];
-                    for (var i = 0, blob; blob = results.entries[i]; i++) {
-                        output.push('<tr><td colspan="3"><a href="javascript:void(0)" onclick="getList(\'' + blob.name + '\')">', blob.name.replace(prefix,''), '</a></td></tr>');
-
-                        dataTable.row.add({
-                            name: '<a href="javascript:void(0)" onclick="getList(\'' + container + '/' + blob.name + '\')">' + blob.name.replace(prefix,'') + '</a>',
-                            size: '',
-                            lastModified: ''
-                        });
-                    }
-
-                    dataTable.draw();
-                    fileList = output.concat(fileList);
-                    //renderFileList();
-                }
-            });
-
-            service.listBlobsSegmentedWithPrefix(container, prefix, null, {delimiter: '/'}, function (error, results) {
-                if (error) {
-                    alert('List blob error, please open browser console to view detailed error');
-                    console.log(error);
-                } else {
-                    let output = [];
-                    for (var i = 0, blob; blob = results.entries[i]; i++) {
-                        let lastModified = moment(blob.lastModified);
-
-                        dataTable.row.add({
-                            name: '<a href="' + blobUri + '/' + container + '/' + blob.name + '">' + blob.name.replace(prefix, '') + '</a>',
-                            size: humanFileSize(blob.contentLength),
-                            lastModified: lastModified.format('YYYY-MM-DD hh:mm:ss A')
-                        });
-                    }
-                    fileList = fileList.concat(output);
-
-                    dataTable.draw();
-                }
-            });
-        }
-
-        $.fn.dataTable.ext.type.order['directory-file-pre'] = function ( data ) {
-
-            // Remove link code
-            let div = document.createElement("div");
-            div.innerHTML = data;
-            data = div.textContent || div.innerText || "";
-
-            if (data.includes('/'))
-                return '/' + data;
-
-            return data;
-        };
-
-        $.fn.dataTable.ext.type.order['file-size-pre'] = function ( data ) {
-            if (data.length === 0)
-                return -1;
-
-            var units = data.replace(/[\d\.]/g, '').trim().toLowerCase();
-            var multiplier = 1;
-
-            if ( units === 'kb' ) {
-                multiplier = 1000;
-            }
-            else if ( units === 'mb' ) {
-                multiplier = 1000000;
-            }
-            else if ( units === 'gb' ) {
-                multiplier = 1000000000;
-            }
-
-            return parseFloat(data) * multiplier;
-        };
-
-        function humanFileSize(bytes, si) {
-            if (si === undefined) si = true;
-
-            var thresh = si ? 1000 : 1024;
-            if(Math.abs(bytes) < thresh) {
-                return bytes + ' B';
-            }
-            var units = si
-                ? ['kB','MB','GB','TB','PB','EB','ZB','YB']
-                : ['KiB','MiB','GiB','TiB','PiB','EiB','ZiB','YiB'];
-            var u = -1;
-            do {
-                bytes /= thresh;
-                ++u;
-            } while(Math.abs(bytes) >= thresh && u < units.length - 1);
-            return bytes.toFixed(1)+' '+units[u];
-        }
-
-        if (!String.prototype.includes) {
-            String.prototype.includes = function(search, start) {
-                'use strict';
-                if (typeof start !== 'number') {
-                    start = 0;
-                }
-
-                if (start + search.length > this.length) {
-                    return false;
-                } else {
-                    return this.indexOf(search, start) !== -1;
-                }
-            };
-        }
-
-    </script>
 </body>
 </html>
