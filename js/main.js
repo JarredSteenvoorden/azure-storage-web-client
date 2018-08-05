@@ -5,16 +5,17 @@ let dataTable = null;
 $(document).ready(function () {
     // Setup data table
     dataTable = $('#data-table').DataTable({
-        "ordering": true,
-        "paging":   false,
-        "info":     false,
-        "columns": [
-            { "data": "name", type: "directory-file" },
-            { "data": "size", type: "file-size" },
-            { "data": "lastModified", type: "date" }
+        ordering: true,
+        searching: false,
+        paging:   false,
+        info:     false,
+        columns: [
+            { data: "name", type: "directory-file" },
+            { data: "size", type: "file-size" },
+            { data: "lastModified", type: "date" }
         ],
-        "language": {
-            "emptyTable": "Empty Folder",
+        language: {
+            emptyTable: "Empty Folder",
         }
     });
 
