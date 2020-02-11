@@ -114,7 +114,7 @@ function loadFiles() {
 
                 dataTable.row.add({
                     name: '<a href="' + donwloadUri + '/' + container + '/' + blob.name + '">' + blob.name.replace(prefix, '') + '</a>',
-                    size: humanFileSize(blob.contentLength),
+                    size: humanFileSize(blob.contentLength, false),
                     lastModified: lastModified.format('YYYY-MM-DD hh:mm:ss A')
                 });
             }
