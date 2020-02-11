@@ -148,14 +148,17 @@ $.fn.dataTable.ext.type.order['file-size-pre'] = function ( data ) {
     var units = data.replace(/[\d\.]/g, '').trim().toLowerCase();
     var multiplier = 1;
 
-    if ( units === 'kb' ) {
-        multiplier = 1000;
+    if ( units === 'kib' ) {
+        multiplier = 1024;
     }
-    else if ( units === 'mb' ) {
-        multiplier = 1000000;
+    else if ( units === 'mib' ) {
+        multiplier = 1024*1024;
     }
-    else if ( units === 'gb' ) {
-        multiplier = 1000000000;
+    else if ( units === 'gib' ) {
+        multiplier = 1024*1024*1024;
+    }
+    else if ( units === 'tib' ) {
+        multiplier = 1024*1024*1024*1024;
     }
 
     return parseFloat(data) * multiplier;
