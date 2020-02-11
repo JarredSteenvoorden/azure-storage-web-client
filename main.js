@@ -113,7 +113,7 @@ function loadFiles() {
                 let lastModified = moment(blob.lastModified);
 
                 dataTable.row.add({
-                    name: '<a href="' + blobUri + '/' + container + '/' + blob.name + '">' + blob.name.replace(prefix, '') + '</a>',
+                    name: '<a href="' + donwloadUri + '/' + container + '/' + blob.name + '">' + blob.name.replace(prefix, '') + '</a>',
                     size: humanFileSize(blob.contentLength),
                     lastModified: lastModified.format('YYYY-MM-DD hh:mm:ss A')
                 });
