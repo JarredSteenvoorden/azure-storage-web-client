@@ -64,19 +64,24 @@
 
     methods: {
       async loadPath(path) {
+        // Make sure last character of path is /
+        if (path.slice(-1) !== '/')
+          path += '/'
+
+        // Build breadcrumbs
         this.breadcrumbs = [{ text: 'home', link: '/' }];
 
         let parts = path.split('/').slice(1, -1)
         for(let i = 0; i < parts.length; i++ ) {
           this.breadcrumbs.push({
             text: parts[i],
-            link: '/' + parts.slice(0, i + 1).join('/')
+            link: '/' + parts.slice(0, i + 1).join('/') + '/'
           });
         }
 
+        // Get containers / blobs
         let containerName = path.split('/')[1];
         let prefix = path.split('/').slice(2, -1).join('/') + '/';
-        if (prefix === '/') prefix = '';
 
         if (!containerName)
           await this.listContainers();
@@ -108,7 +113,7 @@
       },
 
       async listBlobs(containerName, prefix = null) {
-        if (prefix === '')
+        if (!prefix || prefix === '' || prefix === '/')
           prefix = null;
 
         this.loading = true
