@@ -3,7 +3,7 @@
     <div class="text-h2">{{ config.header }}</div>
 
     <div>
-      <router-link to="/">home/</router-link>
+      <router-link v-for="crumb in breadcrumbs" :key="crumb.link" :to="crumb.link">/{{ crumb.text }}</router-link>
     </div>
 
     <v-data-table
@@ -64,6 +64,16 @@
 
     methods: {
       async loadPath(path) {
+        this.breadcrumbs = [{ text: 'home', link: '/' }];
+
+        let parts = path.split('/').slice(1, -1)
+        for(let i = 0; i < parts.length; i++ ) {
+          this.breadcrumbs.push({
+            text: parts[i],
+            link: '/' + parts.slice(0, i + 1).join('/')
+          });
+        }
+
         let containerName = path.split('/')[1];
         let prefix = path.split('/').slice(2, -1).join('/') + '/';
         if (prefix === '/') prefix = '';
@@ -113,7 +123,7 @@
             prefix: blob.name,
             isFolder: blob.kind === "prefix",
 
-            name: blob.name.replace(prefix, ''),
+            name: blob.name.replace(prefix, '').replace('/', ''),
             size: blob.properties?.contentLength,
             lastModified: blob.properties?.lastModified
           });
@@ -166,6 +176,7 @@
           containers: [],
           downloadUri: null
         },
+        breadcrumbs: [],
         loading: false,
         snackbar: false,
         headers: [
