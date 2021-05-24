@@ -76,8 +76,6 @@
 const { BlobServiceClient } = require("@azure/storage-blob");
 import { format } from 'date-fns'
 
-let blobServiceClient = null;
-
 export default {
   name: 'App',
 
@@ -91,7 +89,7 @@ export default {
     const runtimeConfig = await fetch('/config.json')
     this.config = await runtimeConfig.json();
 
-    blobServiceClient = new BlobServiceClient(this.config.connectionString);
+    this.blobServiceClient = new BlobServiceClient(this.config.connectionString);
 
     await this.loadPath(this.$route.path);
   },
@@ -129,7 +127,7 @@ export default {
     },
 
     async listContainers() {
-      //let containers = blobServiceClient.listContainers();
+      //let containers = this.blobServiceClient.listContainers();
       let containers = this.config.containers.map(containerName => { return {name: containerName} });
 
       this.items = [];
@@ -152,7 +150,7 @@ export default {
 
       this.loading = true
 
-      const containerClient = blobServiceClient.getContainerClient(containerName);
+      const containerClient = this.blobServiceClient.getContainerClient(containerName);
       let blobs = containerClient.listBlobsByHierarchy('/', {prefix: prefix});
 
       this.items = [];
@@ -209,6 +207,8 @@ export default {
   data () {
     return {
       format,
+      blobServiceClient: null,
+
       config: {
         header: null,
         connectionString: null,
