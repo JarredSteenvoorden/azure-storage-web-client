@@ -130,12 +130,7 @@ export default {
 
     async listContainers() {
       //let containers = blobServiceClient.listContainers();
-      let containers = [
-        {name: 'library-software'},
-        {name: 'public'},
-        {name: 'support'},
-        {name: 'temp'},
-      ]
+      let containers = this.config.containers.map(containerName => { return {name: containerName} });
 
       this.items = [];
       for await (const container of containers) {
