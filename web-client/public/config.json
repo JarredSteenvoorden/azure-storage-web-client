@@ -1,0 +1,6 @@
+{
+  "header": "files.fetechgroup.com",
+  "connectionString": "https://fefiles.blob.core.windows.net",
+  "containers": ["library-software", "public", "support", "temp"],
+  "downloadUri": "https://files.fetechgroup.com"
+}
