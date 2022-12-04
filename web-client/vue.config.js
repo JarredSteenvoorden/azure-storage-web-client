@@ -21,5 +21,20 @@ module.exports = {
       filename: '[name].[hash].js',
       chunkFilename: '[name].[hash].js',
     }
+  },
+
+  pages: {
+    app: {
+      entry: 'src/main.js',
+      template: 'public/index.html',
+      filename: 'index.html',
+      excludeChunks: ['oidc-callback']
+    },
+    oidccallback: {
+      entry: 'src/oidc-callback.js',
+      template: 'public/oidc-callback.html',
+      filename: 'oidc-callback.html',
+      excludeChunks: ['app']
+    }
   }
 }
