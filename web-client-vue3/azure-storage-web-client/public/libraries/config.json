@@ -1,0 +1,6 @@
+{
+  "header": "Azure Storage Web client",
+  "connectionString": "https://STORAGE_ACCOUNT_NAME.blob.core.windows.net",
+  "containers": ["CONTAINER_NAME"],
+  "downloadUri": "https://STORAGE_ACCOUNT_NAME.blob.core.windows.net"
+}

@@ -1,5 +1,5 @@
 import { createApp } from 'vue'
-import { Quasar } from 'quasar'
+import {Notify, Quasar} from 'quasar'
 import App from './App.vue'
 
 // Import Quasar icon libraries and css
@@ -10,7 +10,9 @@ import 'quasar/src/css/index.sass'
 const app = createApp(App);
 
 app.use(Quasar, {
-    plugins: {}, // import Quasar plugins and add here
+    plugins: {
+        notify: Notify
+    },
 })
 
 app.mount('#app');
